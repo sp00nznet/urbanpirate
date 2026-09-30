@@ -1,0 +1,31 @@
+# --- Game data: never committed (REPO_RULES section 3) ---
+Urban Pirate/
+game/
+*.win
+*.ogg
+*.mp3
+
+# --- Derived from the game: never committed ---
+generated/
+scratch/
+*.asm
+*.gml
+
+# --- Build output and local files ---
+build/
+Play Urban Pirate.cmd
+setup.log
+gmrecomp.log
+*.mp4
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
+
+# --- Editor / OS ---
+.vs/
+.vscode/
+__pycache__/
+Thumbs.db
+.DS_Store
