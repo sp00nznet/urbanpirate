@@ -30,8 +30,8 @@ Island, the game's own save and Continue, music and sound.
 | Dev menu: savestates, speed, cheats, luck, controls | Working |
 | Steam achievements | Logged only |
 
-Smoke test (`tools\smoke.ps1`): **2/2 routes pass**. New game reaches
-`room_lvl_1`, and Continue loads the save.
+Smoke test (`tools\smoke.ps1`): **3/3 routes pass**. New game reaches
+`room_lvl_1` by keyboard and by mouse alone, and Continue loads the save.
 
 ## Screenshots
 
@@ -50,7 +50,8 @@ The game runs as it shipped, and everything else is in the menu bar above it:
 |---|---|
 | **Cheats** | Edit money, food, energy, sanity, hunger, smoke, street cred and XP, or lock any of them. Refill everything, +$500. |
 | **Cheats > Luck** | Dumpster diving finds the good stuff, shoplifting always succeeds, socializing goes well, hitchhiking gets a ride, train painting never gets caught, your friend shows up to fights, skate judges love you, plants grow fast and big, loaded dice. |
-| **Cheats > Controls** | Smooth movement (on by default): hold the arrows to move, go diagonal, slide along the coast. |
+| **Cheats > Controls** | Smooth movement: hold the arrows to move, go diagonal, slide along the coast. Click the map to walk there. Quick actions: tap 1/2/3 (or click the icon) instead of hold + Enter. All on by default. |
+| **Mouse** | Click the game's buttons and icons. The ◄ ► selectors take a click on either end. Clicking anywhere else is Enter, right-click is Esc. |
 | **Luck** | Every one of the game's 223 random picks, each labelled with its outcome and forceable. |
 | **Controls** | Extra keys for any game key, and gamepad support (left stick or d-pad moves, A = Enter, X = Space...). |
 | **File / Game** | 10 savestate slots (F6/F7), pause (F8), frame step (F9), speed 0.25x-8x, hold Tab for 4x, go to any room. |

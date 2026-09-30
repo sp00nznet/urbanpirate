@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions: [Sem
 ## [Unreleased]
 
 ### Added
+- Mouse support (needs gmrecomp#1): click the game's buttons and icons, ◄ ► selectors by their
+  ends, Enter/Esc elsewhere; click the map to walk there.
+- Quick actions: a tap of 1/2/3 or a click on the icon does the game's "hold the key, press
+  Enter" for you.
+- Smoke route "mouse clicks reach level 1" (3/3).
+
+### Added
 - Urban Pirate recompiled with gmrecomp: 1691/1691 code entries, boots through the intro and
   title menu into level 1, with the game's own save and Continue working.
 - Cheats menu (`profile/profile_up.cpp`): stat editors with locks, refill, +$500.

@@ -100,8 +100,17 @@ static void dice_step(void) {
  * movement drives the speed from the held keys every step and slides along
  * walls one axis at a time, so the coast never catches you. */
 
-static bool smooth_move = true;
+static bool smooth_move = true, click_walk = true, quick_actions = true;
 static int p1_obj = -2, walls[3];
+static bool walking;                    /* click-to-walk target is live */
+static double walk_x, walk_y;
+static int walk_stuck;
+
+static void find_objects(void) {
+    if (p1_obj != -2) return;
+    p1_obj = dev_object("p1");
+    walls[0] = dev_object("sheep_island_mask"); walls[1] = dev_object("shark_city_mask"); walls[2] = dev_object("final_cops");
+}
 
 static bool blocked(Inst *p, double x, double y) {
     for (int w : walls) {
@@ -112,17 +121,26 @@ static bool blocked(Inst *p, double x, double y) {
 }
 
 static void premove(void) {
-    if (!smooth_move) return;
-    if (p1_obj == -2) {
-        p1_obj = dev_object("p1");
-        walls[0] = dev_object("sheep_island_mask"); walls[1] = dev_object("shark_city_mask"); walls[2] = dev_object("final_cops");
-    }
+    find_objects();
     Inst *p = dev_first(p1_obj);
-    if (!p || dev_get("controls_on") != 0 || dev_get("pause") != 0) return;
+    if (!p || dev_get("controls_on") != 0 || dev_get("pause") != 0) { walking = false; return; }
     const double spd = 3;
-    double dx = (gm_key_down[39] - gm_key_down[37]) * spd, dy = (gm_key_down[40] - gm_key_down[38]) * spd;
+    bool keys = gm_key_down[37] || gm_key_down[38] || gm_key_down[39] || gm_key_down[40];
+    if (keys) walking = false;
+    double dx = 0, dy = 0;
+    if (walking) {
+        /* steer the sprite's middle onto the clicked point */
+        double l, t, r, b; gm_bbox(p, &l, &t, &r, &b);
+        double ex = walk_x - (l + r) / 2, ey = walk_y - (t + b) / 2, d = hypot(ex, ey);
+        if (d <= spd) { walking = false; }
+        else { dx = ex / d * spd; dy = ey / d * spd; }
+    } else if (smooth_move) {
+        dx = (gm_key_down[39] - gm_key_down[37]) * spd; dy = (gm_key_down[40] - gm_key_down[38]) * spd;
+    } else return;                      /* stock movement */
     if (dx && blocked(p, p->x + dx, p->y)) dx = 0;
     if (dy && blocked(p, p->x + dx, p->y + dy)) dy = 0;
+    if (walking && !dx && !dy && ++walk_stuck > 10) walking = false;   /* walked into the coast */
+    if (dx || dy) walk_stuck = 0;
     p->hspeed = dx; p->vspeed = dy; p->speed = hypot(dx, dy);
     if (dx > 0) p->xscale = -1;
     if (dx < 0) p->xscale = 1;
@@ -158,6 +176,45 @@ void profile_menu(void) {
 
     ImGui::SeparatorText("Controls");
     ImGui::MenuItem("Smooth movement (hold to move, slide along the coast)", nullptr, &smooth_move);
+    ImGui::MenuItem("Click on the map to walk there", nullptr, &click_walk);
+    ImGui::MenuItem("Quick actions (tap 1/2/3 or click the icon, no hold + Enter)", nullptr, &quick_actions);
+}
+
+/* ---------------- actions ----------------
+ * At a location the action icons are keys 1-3, and they don't act on a tap:
+ * holding the key shows a panel, and Enter pressed *while still holding it*
+ * confirms (squat_socialize_Step_0 checks keyboard_check_released(13); the
+ * icon's KeyRelease removes the panel). Quick actions turn a tap of 1-3, or a
+ * click on the icon, into exactly that: hold the key, tap Enter, let go. */
+
+
+static bool held_by_us[256];
+
+static bool on_map(void) {
+    find_objects();
+    return dev_first(p1_obj) && dev_get("controls_on") == 0 && dev_get("pause") == 0;
+}
+static void quick(int vk) { host_key_seq(vk, 0, 6); host_key_seq(13, 2, 1); }
+
+bool profile_key(int vk, bool down) {
+    if (!quick_actions || vk < 49 || vk > 51) return false;
+    if (down) {
+        if (!on_map()) return false;
+        held_by_us[vk] = true; quick(vk);
+        return true;
+    }
+    if (held_by_us[vk]) { held_by_us[vk] = false; return true; }
+    return false;
+}
+
+/* Clicks: an action icon runs its action; the map (nothing clickable under
+ * the cursor) walks there; everything else keeps the toolkit's default. */
+bool profile_click(double x, double y, int button, int key) {
+    if (button != SDL_BUTTON_LEFT || !on_map()) return false;
+    if (key >= 49 && key <= 51) { quick(key); return true; }
+    if (key || !click_walk) return false;
+    walking = true; walk_x = x; walk_y = y; walk_stuck = 0;
+    return true;
 }
 
 void profile_windows(void) {}

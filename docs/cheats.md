@@ -40,6 +40,27 @@ steers when the game would let you move (`controls_on == 0`, `pause == 0`),
 and it sets the game's own `move` flag, so walking animations still play.
 Turn it off in Cheats > Controls for the original feel.
 
+## Actions: hold 1, then Enter
+
+At a location the action icons are keys 1-3, and a tap does nothing. Holding
+the key shows a panel (`squat_socialize` and friends), and Enter pressed *while
+still holding it* confirms: the panel's Step checks
+`keyboard_check_released(13)`, and the icon's KeyRelease removes the panel.
+**Quick actions** (on by default) turn a tap of 1-3, a gamepad button bound to
+them, or a click on the icon into exactly that sequence: hold the key, tap
+Enter two steps later, release after six. It only applies on the map
+(`controls_on == 0`, `pause == 0`), so menus that use 1-3 aren't affected.
+
+## Mouse
+
+The toolkit turns a click on any key-driven object into its key (see gmrecomp
+`docs/runtime.md`, "Mouse"). The profile adds two things:
+
+- a click on an action icon runs the quick action;
+- a click on the map, with nothing clickable under it, walks the player there
+  (the same steering and wall sliding as smooth movement). It stops on
+  arrival, when an arrow key is pressed, or after 10 steps stuck on the coast.
+
 ## Luck
 
 Every outcome below is a `choose()` whose result selects which result object

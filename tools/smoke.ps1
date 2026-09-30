@@ -25,7 +25,10 @@ $env:LOCALAPPDATA = $tmp          # gm_save_dir() lives under LOCALAPPDATA
 $enter = (1..10 | ForEach-Object { "$(1060 + $_ * 45):13" }) -join ','
 $routes = @(
     @{ name = "new game reaches level 1";  keys = "1000:37,1030:13,$enter"; frames = 1600; room = "room_lvl_1" },
-    @{ name = "continue loads the save";   keys = "1000:39,1030:13";         frames = 1150; room = "room_level_menu" }
+    @{ name = "continue loads the save";   keys = "1000:39,1030:13";         frames = 1150; room = "room_level_menu" },
+    # mouse only: left third of the title selector = Left, middle = Enter, then clicks
+    @{ name = "mouse clicks reach level 1"; keys = "";                        frames = 1600; room = "room_lvl_1"; reset = $true;
+       clicks = @("1000:560,574", "1030:640,574") + (1..10 | ForEach-Object { "$(1060 + $_ * 45):640,900" }) }
 )
 $pass = 0
 Push-Location $tmp
@@ -33,7 +36,11 @@ try {
     foreach ($r in $routes) {
         # the exe logs to stderr; PowerShell 5.1 turns that into errors under "Stop"
         $ErrorActionPreference = "Continue"
-        $out = & $exe --game $GameDir --headless --seed 1 --frames $r.frames --keys $r.keys 2>&1 | Out-String
+        if ($r.reset) { Get-ChildItem $tmp -Recurse -Filter "save0*" | Remove-Item -Force }
+        $extra = @()
+        if ($r.keys) { $extra += @("--keys", $r.keys) }
+        foreach ($c in $r.clicks) { $extra += @("--click", $c) }
+        $out = & $exe --game $GameDir --headless --seed 1 --frames $r.frames @extra 2>&1 | Out-String
         $ErrorActionPreference = "Stop"
         $ok = $out -match "exit after \d+ frames in room (\S+)"
         $room = if ($ok) { $Matches[1] } else { "?" }
